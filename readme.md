@@ -73,7 +73,7 @@ You can also set everything up by using the settings menu in the script.
     Traditional Markdown syntax:
   
     - List item
-    
+        
         Paragraph in the list item.
   
     In this script, you need to use a different syntax:
