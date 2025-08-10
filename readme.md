@@ -7,6 +7,14 @@ This way you can save time by not having to write HTML code directly.
 
 ## Requirements
 - Python 3.10 or higher
+- Standard Python libraries:
+    - `os`
+    - `re`
+    - `json`
+
+
+### Bundled Libraries
+- [`Syhmmac's Simple Logger`](https://github.com/Syhmac/simple_logger)
 
 ## Usage
 1. Clone the repository or download the script.
@@ -60,8 +68,25 @@ You can also set everything up by using the settings menu in the script.
 
 ## Limitations
 - The script does not support all Markdown features, such as footnotes, definition lists, and reference-style links.
-- Some advanced Markdown features may not be fully supported.
-- The script may not handle all edge cases in Markdown syntax.
+- Including a paragraph in the list takes a bit of different syntax than in Markdown.
+    ```md
+    Traditional Markdown syntax:
+  
+    - List item
+    
+        Paragraph in the list item.
+  
+    In this script, you need to use a different syntax:
+  
+    - List item
+        Paragraph in the list item.
+  
+    Note that you don't need that additional blank line before the paragraph.
+    If you want to include the blank line, make sure fill it with as many spaces
+    as the indentation for the paragraph.
+    ```
+- Indentations in list need to be done with spaces, not tabs, and should be consistently long.
+- Code blocks do not support syntax highlighting.
 
 ## Known Issues
 So far there is no known issues with the script.
