@@ -136,7 +136,9 @@ def handle_conversion(lines: list) -> str:
                 currently_open.append("h6")
                 lines[i] = lines[i].lstrip('######')
             lines[i] = lines[i].rstrip('\n')
-            formatted_output = check_for_formatting(lines[i])
+            tokenized_line = check_for_image_and_link(lines[i])
+            tokenized_line[0] = check_for_formatting(tokenized_line[0])
+            formatted_output = detokenize_images_and_links(tokenized_line[0], tokenized_line[1])
             output += f"<{currently_open[-1]}>{formatted_output}"
         # Check for blockquotes
         elif lines[i].startswith('>'):
@@ -227,7 +229,9 @@ def handle_conversion(lines: list) -> str:
                 if not output.endswith("<br>"):
                     output += " "
             lines[i] = lines[i].rstrip('\n')
-            formatted_output = check_for_formatting(lines[i])
+            tokenized_line = check_for_image_and_link(lines[i])
+            tokenized_line[0] = check_for_formatting(tokenized_line[0])
+            formatted_output = detokenize_images_and_links(tokenized_line[0], tokenized_line[1])
             output += formatted_output
 
     if currently_open != []:
@@ -250,6 +254,77 @@ def close_any_open_paragraph(currently_open: list, output: str) -> list:
     output_list = [currently_open, output]
     return output_list
 
+def check_for_image_and_link(line: str) -> list:
+    """
+    Checks for images and links in the line and returns the list containing tokenized string and keys for tokens.
+    :param line:
+    :return: [tokenized string, [key0, key1, ...]]
+    """
+    found_image_or_link = True
+    tokens = []
+    token_id = 0
+    while found_image_or_link:
+        found_image_or_link = False
+        if re.search(r'!\[(.+?)]\((.+?)\)', line):
+            found_image_or_link = True
+            match = re.search(r'!\[(.+?)]\((.+?)\)', line)
+            alt_text = match.group(1)
+            img_url = match.group(2)
+            img_tag = f'<img src="{img_url}" alt="{alt_text}">'
+            tokens.append(img_tag)
+            line = re.sub(r'!\[(.+?)]\((.+?)\)', f'{token_id}-TOKEN', line, count=1)
+            token_id += 1
+            continue
+        if re.search(r'\[(.+?)]\((.+?)\)', line):
+            found_image_or_link = True
+            match = re.search(r'\[(.+?)]\((.+?)\)', line)
+            link_text = match.group(1)
+            link_url = match.group(2)
+            link_tag = f'<a href="{link_url}">{link_text}</a>'
+            tokens.append(link_tag)
+            line = re.sub(r'\[(.+?)]\((.+?)\)', f'{token_id}-TOKEN', line, count=1)
+            token_id += 1
+            continue
+        if re.search(r'<([^>]+?@[^>]+?)>', line):
+            found_image_or_link = True
+            match = re.search(r'<([^>]+?@[^>]+?)>', line)
+            email = match.group(1)
+            email_tag = f'<a href="mailto:{email}">{email}</a>'
+            tokens.append(email_tag)
+            line = re.sub(r'<([^>]+?@[^>]+?)>', f'{token_id}-TOKEN', line, count=1)
+            token_id += 1
+            continue
+        if re.search(r'<(.+?)>', line):
+            found_image_or_link = True
+            match = re.search(r'<(.+?)>', line)
+            url = match.group(1)
+            url_tag = f'<a href="{url}">{url}</a>'
+            tokens.append(url_tag)
+            line = re.sub(r'<(.+?)>', f'{token_id}-TOKEN', line, count=1)
+            token_id += 1
+            continue
+
+    output = [line, tokens]
+    return output
+
+def detokenize_images_and_links(line: str, tokens: list) -> str:
+    """
+    Replaces tokens in the line with the corresponding image or link tags.
+    :param line: line with tokens
+    :param tokens: list of tokens to replace
+    :return: line with tokens replaced by image or link tags
+    """
+    token_found = True
+    while token_found:
+        token_found = False
+        if re.search(r'\d+-TOKEN', line):
+            token_found = True
+            match = re.search(r'(\d+)-TOKEN', line)
+            token_index = int(match.group(1))
+            line = re.sub(r'\d+-TOKEN', tokens[token_index], line, count=1)
+            continue
+    return line
+
 def check_for_formatting(line: str) -> str:
     """
     Checks for Markdown formatting in the line and returns the formatted line.
@@ -257,6 +332,7 @@ def check_for_formatting(line: str) -> str:
     :return: Text formatted as HTML
     """
     found_formating = True
+    line_formatted = line
     while found_formating:
         found_formating = False
         if line.find("***") != -1:
@@ -348,7 +424,10 @@ def handle_ordered_list(lines: list) -> str:
             continue
         if re.match(r'^\d+\.\s', lines[i]):
             lines[i] = re.sub(r'^\d+\.\s', '', lines[i], count=1)
-            output += f'<li>{check_for_formatting(lines[i].rstrip("\n"))}</li>\n'
+            tokenized_line = check_for_image_and_link(lines[i].rstrip("\n"))
+            tokenized_line[0] = check_for_formatting(tokenized_line[0])
+            formatted_output = detokenize_images_and_links(tokenized_line[0], tokenized_line[1])
+            output += f'<li>{formatted_output}</li>\n'
         elif lines[i].startswith(' '):
             deeper_lines_ended = False
             deeper_lines_count = 0
@@ -382,7 +461,10 @@ def handle_unordered_list(lines: list) -> str:
             continue
         if re.match(r'^[-*+]\s', lines[i]):
             lines[i] = re.sub(r'^[-*+]\s', '', lines[i], count=1)
-            output += f'<li>{check_for_formatting(lines[i].rstrip("\n"))}</li>\n'
+            tokenized_line = check_for_image_and_link(lines[i].rstrip("\n"))
+            tokenized_line[0] = check_for_formatting(tokenized_line[0])
+            formatted_output = detokenize_images_and_links(tokenized_line[0], tokenized_line[1])
+            output += f'<li>{formatted_output}</li>\n'
         elif lines[i].startswith(' '):
             deeper_lines_ended = False
             deeper_lines_count = 0

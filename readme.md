@@ -18,9 +18,14 @@ This way you can save time by not having to write HTML code directly.
 
 ## Usage
 1. Clone the repository or download the script.
-2. Place your Markdown files in the same directory as the script.
-3. Run the cript from the command line or Python executable.
-4. Follow the directions in the script to convert your Markdown files to HTML.
+2. Place your Markdown files in a director that will be easy to specify with text for you. (e.g. in the same directory as the script)
+3. Run the script from the command line or Python executable.
+4. Follow the directions in the script to convert your Markdown files to HTML (below instruction to convert without any configs).
+   1. Type '1' and press Enter
+   2. Specify the path to your Markdown file.
+   3. Specify the path to the output HTML file.
+5. If you want to convert multiple files, you can repeat step 4, as program will return to menu after converting.
+6. If you want to set up the class names for HTML elements, choose option '2' in the menu and follow the instructions.
 
 If there is no config file, the script will create a default one for you.
 
@@ -61,7 +66,7 @@ If there is no config file, the script will create a default one for you.
     - [ ] Auto-linking URLs
 
 ## Configuration
-You can configure the script by editing the `mc_to_html_config.json` file.
+You can configure the script by editing the `md_to_html_config.json` file.
 This will allow you to set default CSS classes for each HTML element generated from Markdown.
 
 You can also set everything up by using the settings menu in the script.
