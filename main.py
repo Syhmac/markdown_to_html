@@ -159,6 +159,44 @@ def handle_conversion(lines: list) -> str:
             skip_lines += line_count - 1
             blockquote_output = handle_blockquote(blockquote_lines)
             output += blockquote_output
+        # Check for tables
+        elif lines[i].startswith('| '):
+            temp = close_any_open_paragraph(currently_open, output)
+            currently_open = temp[0]
+            output = temp[1]
+            table_lines = []
+            table_ended = False
+            line_count = 0
+            while not table_ended:
+                try:
+                    table_lines.append(lines[i + line_count])
+                    line_count += 1
+                    if not lines[i + line_count].startswith("| ") and not lines[i + line_count].startswith("|:") and not lines[i + line_count].startswith("|-"):
+                        table_ended = True
+                except IndexError:
+                    table_ended = True
+            skip_lines += line_count - 1
+            table_output = handle_table(table_lines)
+            output += table_output
+        # Check for task lists
+        elif re.match(r'- \[([ x])] (.+)', lines[i]):
+            temp = close_any_open_paragraph(currently_open, output)
+            currently_open = temp[0]
+            output = temp[1]
+            task_list_lines = []
+            task_list_ended = False
+            line_count = 0
+            while not task_list_ended:
+                try:
+                    task_list_lines.append(lines[i + line_count])
+                    line_count += 1
+                    if not re.match(r'- \[([ x])] (.+)', lines[i + line_count]) and not lines[i + line_count].startswith(' '):
+                        task_list_ended = True
+                except IndexError:
+                    task_list_ended = True
+            skip_lines += line_count - 1
+            task_list_output = handle_task_list(task_list_lines)
+            output += task_list_output
         # Check for ordered lists
         elif lines[i].startswith('1. '):
             temp = close_any_open_paragraph(currently_open, output)
@@ -268,6 +306,126 @@ def tokenize_line(line: str) -> list:
     token_id = 0
     while found_token:
         found_token = False
+        if re.search(r'(\\{2})', line):
+            found_token = True
+            tokens.append("\\\\")
+            line = re.sub(r'(\\{2})', f'{token_id}-TOKEN', line, count=1)
+            token_id += 1
+            continue
+        if re.search(r'(\\`)', line):
+            found_token = True
+            tokens.append("`")
+            line = re.sub(r'(\\`)', f'{token_id}-TOKEN', line, count=1)
+            token_id += 1
+            continue
+        if re.search(r'(\\\*)', line):
+            found_token = True
+            tokens.append("*")
+            line = re.sub(r'(\\\*)', f'{token_id}-TOKEN', line, count=1)
+            token_id += 1
+            continue
+        if re.search(r'(\\_)', line):
+            found_token = True
+            tokens.append("_")
+            line = re.sub(r'(\\_)', f'{token_id}-TOKEN', line, count=1)
+            token_id += 1
+            continue
+        if re.search(r'(\\{)', line):
+            found_token = True
+            tokens.append("{")
+            line = re.sub(r'(\\{)', f'{token_id}-TOKEN', line, count=1)
+            token_id += 1
+            continue
+        if re.search(r'(\\})', line):
+            found_token = True
+            tokens.append("}")
+            line = re.sub(r'(\\})', f'{token_id}-TOKEN', line, count=1)
+            token_id += 1
+            continue
+        if re.search(r'(\\\[)', line):
+            found_token = True
+            tokens.append("[")
+            line = re.sub(r'(\\\[)', f'{token_id}-TOKEN', line, count=1)
+            token_id += 1
+            continue
+        if re.search(r'(\\])', line):
+            found_token = True
+            tokens.append("]")
+            line = re.sub(r'(\\])', f'{token_id}-TOKEN', line, count=1)
+            token_id += 1
+            continue
+        if re.search(r'(\\<)', line):
+            found_token = True
+            tokens.append("<")
+            line = re.sub(r'(\\<)', f'{token_id}-TOKEN', line, count=1)
+            token_id += 1
+            continue
+        if re.search(r'(\\>)', line):
+            found_token = True
+            tokens.append(">")
+            line = re.sub(r'(\\>)', f'{token_id}-TOKEN', line, count=1)
+            token_id += 1
+            continue
+        if re.search(r'(\\\()', line):
+            found_token = True
+            tokens.append("(")
+            line = re.sub(r'(\\\()', f'{token_id}-TOKEN', line, count=1)
+            token_id += 1
+            continue
+        if re.search(r'(\\\))', line):
+            found_token = True
+            tokens.append(")")
+            line = re.sub(r'(\\\))', f'{token_id}-TOKEN', line, count=1)
+            token_id += 1
+            continue
+        if re.search(r'(\\#)', line):
+            found_token = True
+            tokens.append("#")
+            line = re.sub(r'(\\#)', f'{token_id}-TOKEN', line, count=1)
+            token_id += 1
+            continue
+        if re.search(r'(\\\+)', line):
+            found_token = True
+            tokens.append("+")
+            line = re.sub(r'(\\\+)', f'{token_id}-TOKEN', line, count=1)
+            token_id += 1
+            continue
+        if re.search(r'(\\-)', line):
+            found_token = True
+            tokens.append("-")
+            line = re.sub(r'(\\-)', f'{token_id}-TOKEN', line, count=1)
+            token_id += 1
+            continue
+        if re.search(r'(\\\.)', line):
+            found_token = True
+            tokens.append(".")
+            line = re.sub(r'(\\\.)', f'{token_id}-TOKEN', line, count=1)
+            token_id += 1
+            continue
+        if re.search(r'(\\!)', line):
+            found_token = True
+            tokens.append("!")
+            line = re.sub(r'(\\!)', f'{token_id}-TOKEN', line, count=1)
+            token_id += 1
+            continue
+        if re.search(r'(\\=)', line):
+            found_token = True
+            tokens.append("=")
+            line = re.sub(r'(\\=)', f'{token_id}-TOKEN', line, count=1)
+            token_id += 1
+            continue
+        if re.search(r'(\\~)', line):
+            found_token = True
+            tokens.append("~")
+            line = re.sub(r'(\\~)', f'{token_id}-TOKEN', line, count=1)
+            token_id += 1
+            continue
+        if re.search(r'(\\\|)', line):
+            found_token = True
+            tokens.append("|")
+            line = re.sub(r'(\\\|)', f'{token_id}-TOKEN', line, count=1)
+            token_id += 1
+            continue
         if re.search(r'!\[(.+?)]\((.+?)\)', line):
             found_token = True
             match = re.search(r'!\[(.+?)]\((.+?)\)', line)
@@ -304,14 +462,6 @@ def tokenize_line(line: str) -> list:
             url_tag = f'<a href="{url}">{url}</a>'
             tokens.append(url_tag)
             line = re.sub(r'<(.+?)>', f'{token_id}-TOKEN', line, count=1)
-            token_id += 1
-            continue
-        if re.search(r'(\\{2})', line):
-            found_token = True
-            match = re.search(r'(\\{2})', line)
-            esc = match.group(1)
-            tokens.append('\\')
-            line = re.sub(r'(\\{2})', f'{token_id}-TOKEN', line, count=1)
             token_id += 1
             continue
 
@@ -514,8 +664,58 @@ def handle_table(lines: list) -> str:
     :param lines: lines that belong to the table
     :return: Formatted table as HTML
     """
-    pass
-    #return output
+    output = "<table>\n"
+    column_alignments = []
+    first_header = False
+    if len(lines) < 2:
+        output += "<tr>\n"
+        matches = re.findall(r'(?:\\\||[^|\n])+', lines[0])
+        cell_start = '<td style="text-align: center;">'
+        cell_end = "</td>\n"
+        for j in range(0, len(matches)):
+            output += cell_start
+            cell = tokenize_line(matches[j].strip())
+            cell[0] = check_for_formatting(cell[0])
+            formatted_output = detokenize_line(cell[0], cell[1])
+            output += formatted_output
+            output += cell_end
+        output += "</tr>\n"
+        output += "</table>\n"
+        return output
+    if re.match(r'\| ?(:?-{3,}:?) ?(?:\| ?(:?-{3,}:?) ?)+\|', lines[1]):
+        first_header = True
+        matches = re.finditer(r':?-{3,}:?', lines[1])
+        for match in matches:
+            alignment = match.group(0)
+            if alignment.startswith(':') and alignment.endswith(':'):
+                column_alignments.append('center')
+            elif alignment.startswith(':'):
+                column_alignments.append('left')
+            elif alignment.endswith(':'):
+                column_alignments.append('right')
+            else:
+                column_alignments.append('center') # Default behaviour in many web browsers
+    for i in range(len(lines)):
+        output += "<tr>\n"
+        if i == 1 and first_header:
+            continue
+        matches = re.findall(r'(?:\\\||[^|\n])+', lines[i])
+        if i == 0 and first_header:
+            cell_start = '<th style="text-align: {};">'
+            cell_end = "</th>\n"
+        else:
+            cell_start = '<td style="text-align: {};">'
+            cell_end = "</td>\n"
+        for j in range(0, len(matches)):
+            output += cell_start.format(column_alignments[j] if j < len(column_alignments) else 'center')
+            cell = tokenize_line(matches[j].strip())
+            cell[0] = check_for_formatting(cell[0])
+            formatted_output = detokenize_line(cell[0], cell[1])
+            output += formatted_output
+            output += cell_end
+        output += "</tr>\n"
+    output += "</table>\n"
+    return output
 
 def handle_task_list(lines: list) -> str:
     """
@@ -523,8 +723,43 @@ def handle_task_list(lines: list) -> str:
     :param lines: lines that belong to the task list
     :return: Formatted task list as HTML
     """
-    pass
-    #return output
+    output = ""
+    skip_lines = 0
+    for i in range(len(lines)):
+        if skip_lines > 0:
+            skip_lines -= 1
+            continue
+        if re.match(r'- \[([ x])] (.+)', lines[i]):
+            match = re.match(r'- \[([ x])] (.+)', lines[i])
+            checked = match.group(1) == 'x'
+            if checked:
+                output += '<input type="checkbox" checked disabled> '
+            else:
+                output += '<input type="checkbox" disabled> '
+            content = match.group(2)
+            tokenized_line = tokenize_line(content.strip())
+            tokenized_line[0] = check_for_formatting(tokenized_line[0])
+            formatted_output = detokenize_line(tokenized_line[0], tokenized_line[1])
+            output += f'{formatted_output}<br>\n'
+        elif lines[i].startswith(' '):
+            deeper_lines_ended = False
+            deeper_lines_count = 0
+            deeper_lines = []
+            indent_depth = len(lines[i]) - len(lines[i].lstrip())
+            while not deeper_lines_ended:
+                try:
+                    line = lines[i + deeper_lines_count].replace(' ', '', indent_depth)
+                    deeper_lines.append(line)
+                    deeper_lines_count += 1
+                    if not lines[i + deeper_lines_count].startswith(" "):
+                        deeper_lines_ended = True
+                except IndexError:
+                    deeper_lines_ended = True
+            skip_lines += deeper_lines_count - 1
+            output += "<div style='margin-left: 20px;'>\n"
+            output += handle_conversion(deeper_lines)
+            output += "</div>\n"
+    return output
 
 if __name__ == "__main__":
     """

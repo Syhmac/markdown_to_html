@@ -6,6 +6,7 @@ It's a handy tool for creating content for your website since Markdown is faster
 This way you can save time by not having to write HTML code directly.
 
 ## Requirements
+
 - Python 3.10 or higher
 - Standard Python libraries:
     - `os`
@@ -14,9 +15,11 @@ This way you can save time by not having to write HTML code directly.
 
 
 ### Bundled Libraries
+
 - [`Syhmmac's Simple Logger`](https://github.com/Syhmac/simple_logger)
 
 ## Usage
+
 1. Clone the repository or download the script.
 2. Place your Markdown files in a director that will be easy to specify with text for you. (e.g. in the same directory as the script)
 3. Run the script from the command line or Python executable.
@@ -30,18 +33,19 @@ This way you can save time by not having to write HTML code directly.
 If there is no config file, the script will create a default one for you.
 
 ## Features
+
 - Converts Markdown files to HTML format.
 - Can be configured to include default CSS classes for every element.
 - Supported elements from Markdown syntax:
     - [x] Headers (from h1 to h6)
     - [ ] Headers with IDs
-    - [ ] Alternative header syntax (=== or --- below the text)
+    - [ ] Alternative header syntax (\=\=\= or \-\-\- below the text)
     - [x] Paragraphs
     - [x] Line breaks
-    - [x] Bold text (both ** and __)
-    - [x] Italic text (both * and _)
+    - [x] Bold text (both \*\* and \_\_)
+    - [x] Italic text (both \* and \_)
     - [x] Bold and italic text (\*\*\*, \_\_\_, \_\_\*, \*\*\_)
-    - [x] Strikethrough text (~~)
+    - [x] Strikethrough text (\~\~)
     - [x] Blockquotes
     - [x] Lists (ordered and unordered)
     - [x] Elements within lists
@@ -66,12 +70,14 @@ If there is no config file, the script will create a default one for you.
     - [ ] Auto-linking URLs
 
 ## Configuration
+
 You can configure the script by editing the `md_to_html_config.json` file.
 This will allow you to set default CSS classes for each HTML element generated from Markdown.
 
 You can also set everything up by using the settings menu in the script.
 
 ## Limitations
+
 - The script does not support all Markdown features, such as footnotes, definition lists, and reference-style links.
 - Including a paragraph in the list takes a bit of different syntax than in Markdown.
     ```md
@@ -92,6 +98,12 @@ You can also set everything up by using the settings menu in the script.
     ```
 - Indentations in list need to be done with spaces, not tabs, and should be consistently long.
 - Code blocks do not support syntax highlighting.
+- Tables need to have the same number of columns in each row.
+- Headers require a blank line under them, otherwise they won't close properly.
 
 ## Known Issues
-So far there is no known issues with the script.
+
+- If you encounter any unexpected formatting, make sure that formatting characters are properly escaped.
+    - You need to escape \= character as well, as it's used to highlight text.
+    - You need to escape \~ character as well, as it's used for strikethrough text and subscript.
+- Characters in the code block need to be escaped. This will be fixed later. 
